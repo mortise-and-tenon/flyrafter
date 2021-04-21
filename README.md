@@ -1,37 +1,39 @@
 # FlyRafter
 
 #### 介绍
-实体转为SQL，并结合flyway应用的工具
 
-#### 软件架构
-软件架构说明
+实体类转为SQL文件，并结合应用 `FlyWay` 的工具。
+
+> `FlyRafter` 中文为 “飞椽”。在大式建筑中,为了增加屋檐挑出的深度,在原有圆形断面的檐椽的外端,还要加钉一截方形断面的椽子,这段方形断面的椽子就叫做“飞椽”,也叫“飞檐椽”。
+
+`Spring Boot` 中可以使用 `JPA` 中提供的 Hibernate `ddl-auto` 以实现实体类自动生成数据库表的功能。
+在 `ddl-auto` 中，有四种配置项：
+- `none` 无配置
+- `validate` 应用启动时校验表结构与实体是否一致
+- `update` 应用启动时，向表添加新增字段
+- `create-drop` 应用启动时创建表，应用停止时删除表
+
+但以上配置都无法支持：在开发阶段，发生实体类属性变更时，无法动态同步更新表结构，进而也无法支持产品升级时，某些情况下表的迁移。
+
+### 产品蓝图
+
+`EntityFramwork` 的 `Code First` 模式中，在没有数据库时：
+
+1. 先写代码，项目将自动创建数据库
+2. 如果代码有变化，自动删除数据库重建，或者是使用迁移功能更改已有数据库。
+
+`FlyRafter` 基于此理念，计划支持实体类的生成 SQL 建表语句，并判定是删除数据库重建，还是使用迁移功能更改现有数据库。`FlyRafter` 将利用 `FlyWay` 的支持相应的迁移特性。
+
+初步计划如下：
+
+- [ ] 实体类注解定义或复用 `JPA` 定义
+- [ ] 实体类注解解析
+- [ ] SQL 语句的模板定义
+- [ ] 注解生成为 SQL 文件
+- [ ] 集成 `FlyWay`，识别 SQL 文件用于创建数据库表
+- [ ] 实体类变更识别，并按模式生成新 SQL 文件或升级新版本迁移文件
+- [ ] 独立 jar 编译应用
+- [ ] `Spring Boot` 自动配置对接
+- [ ] 更多
 
 
-#### 安装教程
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### 使用说明
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### 参与贡献
-
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
-
-
-#### 特技
-
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
