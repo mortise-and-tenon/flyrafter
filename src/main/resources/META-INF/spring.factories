@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+org.mt.flyrafter.configuration.CallbackConfiguration,\
+org.mt.flyrafter.configuration.FlyRafterConfiguration
