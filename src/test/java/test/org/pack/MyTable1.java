@@ -18,7 +18,7 @@ public class MyTable1 {
     @Id
     private Long id;
 
-//    private boolean bool1;
+    private boolean bool1;
 
     private Boolean bool2;
 
