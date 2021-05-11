@@ -7,7 +7,7 @@ package fun.mortnon.flyrafter.resolver.template;
  * @date 2021/4/23
  */
 public interface CreateSQLTemplate {
-    String TABLE_PREFIX = "CREATE TABLE `%S` (";
+    String TABLE_PREFIX = "CREATE TABLE `%s` (";
     String COLUMN = " `%s` %s";
     String PRIMARY_KEY = "PRIMARY KEY (`%s`)";
     String TABLE_SUFFIX = ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;";

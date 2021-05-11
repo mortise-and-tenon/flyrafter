@@ -1,7 +1,9 @@
 package fun.mortnon.flyrafter.resolver;
 
+import fun.mortnon.flyrafter.configuration.FlyRafterConfiguration;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.autoconfigure.flyway.FlywayProperties;
 
 import javax.sql.DataSource;
 
@@ -21,6 +23,7 @@ class BasicSQLConvertorTest {
     static final String USER = "root";
     static final String PWD = "123456";
     private static DataSource dataSource;
+    private static FlyRafterConfiguration configuration;
 
     @BeforeAll
     static void before() {
@@ -38,12 +41,19 @@ class BasicSQLConvertorTest {
             throwables.printStackTrace();
         }
 
+        configuration = new FlyRafterConfiguration();
+        FlywayProperties flywayProperties = new FlywayProperties();
+        flywayProperties.setTable("flyway_schema_history");
+
+        configuration.setVersionPattern("1.0.0");
+        configuration.setFlywayProperties(flywayProperties);
+
     }
 
     @Test
     void testConvert() {
         AnnotationProcessor annotationProcessor = new AnnotationProcessor();
-        SQLConvertor convertor = new BasicSQLConvertor(annotationProcessor, dataSource);
+        SQLConvertor convertor = new BasicSQLConvertor(annotationProcessor, dataSource, configuration);
         StringBuffer convert = convertor.convert();
         assertNotNull(convert.toString());
     }

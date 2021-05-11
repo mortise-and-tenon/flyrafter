@@ -1,5 +1,6 @@
 package fun.mortnon.flyrafter.resolver;
 
+import fun.mortnon.flyrafter.configuration.FlyRafterConfiguration;
 import fun.mortnon.flyrafter.entity.DbTable;
 
 import javax.sql.DataSource;
@@ -14,10 +15,12 @@ import java.util.List;
 public abstract class SQLConvertor implements Constants {
     private AnnotationProcessor annotationProcessor;
     protected DataSource dataSource;
+    protected FlyRafterConfiguration configuration;
 
-    public SQLConvertor(AnnotationProcessor annotationProcessor, DataSource dataSource) {
+    public SQLConvertor(AnnotationProcessor annotationProcessor, DataSource dataSource, FlyRafterConfiguration configuration) {
         this.annotationProcessor = annotationProcessor;
         this.dataSource = dataSource;
+        this.configuration = configuration;
     }
 
     public StringBuffer convert() {

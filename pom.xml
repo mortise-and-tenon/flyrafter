@@ -7,10 +7,11 @@
     <groupId>fun.mortnon</groupId>
     <artifactId>flyrafter</artifactId>
     <version>0.0.1</version>
+    <packaging>jar</packaging>
 
-    <name>flyRafter</name>
+    <name>${project.artifactId}</name>
     <url>https://gitee.com/mortise-and-tenon/flyrafter</url>
-    <description>generate sql file from entity class.</description>
+    <description>generate sql file from java entity class.</description>
 
     <licenses>
         <license>
@@ -30,7 +31,7 @@
         <developer>
             <name>mortnon</name>
             <email>mortnon@outlook.com</email>
-            <organization>https://mortnon.fun</organization>
+            <organization>卯榫 mortise-and-tenon</organization>
             <organizationUrl>https://mortnon.fun</organizationUrl>
         </developer>
     </developers>
@@ -204,6 +205,12 @@
             <version>${common.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <version>${spring-boot.version}</version>
+            <optional>true</optional>
+        </dependency>
 
         <!-- 日志处理 -->
         <dependency>

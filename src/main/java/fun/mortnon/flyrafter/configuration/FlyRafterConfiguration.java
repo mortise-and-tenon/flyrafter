@@ -28,24 +28,16 @@ public class FlyRafterConfiguration {
 
     /**
      * Whether to enable flyrafter.
-     * 是否启用 flyrafter.
      */
     private boolean enabled = true;
 
     /**
      * Version pattern for flyRafter sql file.
-     * flyRafter 生成 sql 文件版本号样式
      */
     private String versionPattern = "0";
 
     /**
      * Comma-separated list sql file location.
-     * 逗号分隔的 sql 目录
-     * 目录支持两种类型：
-     * <ul>
-     *     <li><b>filesystem:</b> 指定系统目录，示例：<i>filesystem:/root/db/migration</i></li>
-     *     <li><b>classpath:</b> 指定的classpath下目录，示例：<i>classpath:db/migration</i></li>
-     * </ul>
      */
     private List<String> locations;
 
@@ -53,6 +45,11 @@ public class FlyRafterConfiguration {
      * Sql file backup folder.
      */
     private String backup;
+
+    /**
+     * Map name to underscore style in sql file.
+     */
+    private Boolean mapToUnderscore = true;
 
     /**
      * flyway 记录表名

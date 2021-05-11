@@ -22,7 +22,7 @@ public class FlyRafter {
         this.configuration = configuration;
         this.annotationProcessor = new AnnotationProcessor();
         this.dataSource = dataSource;
-        this.convertor = new BasicSQLConvertor(annotationProcessor, dataSource);
+        this.convertor = new BasicSQLConvertor(annotationProcessor, dataSource, configuration);
         this.fileCreator = new FileCreator();
     }
 

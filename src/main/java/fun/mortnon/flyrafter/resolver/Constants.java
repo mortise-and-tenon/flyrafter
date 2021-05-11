@@ -95,6 +95,18 @@ public interface Constants {
      */
     String DEFAULT_LOCATION = "classpath:db/migration";
 
+    /**
+     * 默认的 sql 文件备份目录
+     */
     String DEFAULT_BACKUP = "backup";
 
+    /**
+     * 下划线符号
+     */
+    Character UNDERSCORE = '_';
+
+    /**
+     * 需要忽略的 flyway 表
+     */
+    String IGNORE_FLYWAY_TABLE = "flyway_schema_history";
 }

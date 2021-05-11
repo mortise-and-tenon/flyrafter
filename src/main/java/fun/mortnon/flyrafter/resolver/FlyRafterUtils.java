@@ -14,9 +14,7 @@ import java.security.MessageDigest;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Enumeration;
+import java.util.*;
 
 import static fun.mortnon.flyrafter.resolver.Constants.*;
 
@@ -114,6 +112,10 @@ public class FlyRafterUtils {
                 String targetFolderUrl = url.getFile();
                 File targetFolder = new File(targetFolderUrl + folder);
                 if (targetFolder.exists()) {
+                    return targetFolder.getPath();
+                } else {
+                    log.info("create directory: {}", targetFolder.getPath());
+                    targetFolder.mkdirs();
                     return targetFolder.getPath();
                 }
             }
@@ -272,6 +274,89 @@ public class FlyRafterUtils {
         }
 
         return stringBuilder.substring(0, stringBuilder.length() - 1).toString();
+    }
+
+    /**
+     * 将驼峰名称转换为下划线形式
+     *
+     * @param name
+     * @return
+     */
+    public static String convertToUnderscore(String name) {
+        StringBuffer strBuffer = new StringBuffer();
+        for (char c : name.toCharArray()) {
+            if (Character.isUpperCase(c) && strBuffer.length() > 0) {
+                strBuffer.append(UNDERSCORE);
+            }
+
+            strBuffer.append(strBuffer.length() > 0 ? Character.toLowerCase(c) : c);
+        }
+
+        return strBuffer.toString();
+    }
+
+    /**
+     * 将下划线形式转换为驼峰
+     *
+     * @param name
+     * @return
+     */
+    public static String convertToCamelcase(String name) {
+        StringBuffer strBuffer = new StringBuffer();
+        boolean hasUnderline = false;
+        for (char c : name.toCharArray()) {
+            if (UNDERSCORE.equals(c)) {
+                if(strBuffer.length() == 0){
+                    strBuffer.append(c);
+                    continue;
+                }
+
+                if(hasUnderline){
+                    strBuffer.append(c);
+                }
+
+                hasUnderline = true;
+                continue;
+            }
+
+            //如果前一个是下划线，当前又是小写，转为大写
+            if (hasUnderline && Character.isLowerCase(c)) {
+                hasUnderline = false;
+                strBuffer.append(Character.toUpperCase(c));
+            } else {
+                strBuffer.append(c);
+            }
+        }
+
+        return strBuffer.toString();
+    }
+
+    /**
+     * 比较两个名称在驼峰、下划线格式两种格式混合下，是否一致
+     *
+     * @param nameOne
+     * @param nameTwo
+     * @return
+     */
+    public static boolean nameEquals(String nameOne, String nameTwo) {
+        if (nameOne.equals(nameTwo)) {
+            return true;
+        }
+
+        Set<String> setOne = new HashSet<>();
+        Set<String> setTwo = new HashSet<>();
+
+        setOne.add(nameOne);
+        setOne.add(convertToUnderscore(nameOne));
+        setOne.add(convertToCamelcase(nameOne));
+
+        setTwo.add(nameTwo);
+        setTwo.add(convertToUnderscore(nameTwo));
+        setTwo.add(convertToCamelcase(nameTwo));
+
+        setOne.addAll(setTwo);
+
+        return setOne.size() < 6;
     }
 
     /**

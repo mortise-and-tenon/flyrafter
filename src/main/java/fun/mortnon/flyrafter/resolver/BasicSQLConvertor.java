@@ -1,5 +1,6 @@
 package fun.mortnon.flyrafter.resolver;
 
+import fun.mortnon.flyrafter.configuration.FlyRafterConfiguration;
 import fun.mortnon.flyrafter.exception.NoColumnException;
 import fun.mortnon.flyrafter.exception.NoPrimaryKeyException;
 import fun.mortnon.flyrafter.resolver.template.AlertSQLTemplate;
@@ -28,13 +29,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class BasicSQLConvertor extends SQLConvertor {
     private boolean ignorePrimaryKey = true;
-    /**
-     * 需要忽略的 flyway 表
-     */
-    private static final String IGNORE_FLYWAY_TABLE = "flyway_schema_history";
 
-    public BasicSQLConvertor(AnnotationProcessor annotationProcessor, DataSource dataSource) {
-        super(annotationProcessor, dataSource);
+    public BasicSQLConvertor(AnnotationProcessor annotationProcessor, DataSource dataSource, FlyRafterConfiguration configuration) {
+        super(annotationProcessor, dataSource, configuration);
     }
 
     @Override
@@ -94,24 +91,28 @@ public class BasicSQLConvertor extends SQLConvertor {
 
             dbTableList.add(tableName);
 
-            tableList.stream().filter(k -> k.getName().equalsIgnoreCase(tableName))
-                    .findAny()
-                    .ifPresent(j -> j.getColumnSet().stream().forEach(m -> m.setAction(ActionEnum.MODIFY)));
-
 
             List<String> dbColumnList = new ArrayList<>();
             ResultSet columns = metaData.getColumns(connection.getCatalog(), "%", tableName, "%");
             while (columns.next()) {
                 String columnName = columns.getString("COLUMN_NAME");
                 dbColumnList.add(columnName);
-                //TODO: 细化检测定义是否变更
-
             }
 
+            //TODO: 细化检测定义是否变更，并调整表名、字段名的驼峰等风格不一格的判定
+            //如果是已有列，标记为修改，否则默认为添加
+            tableList.stream().filter(k -> k.getName().equalsIgnoreCase(tableName))
+                    .findAny()
+                    .ifPresent(j -> j.getColumnSet().stream().forEach(m -> {
+                        if (dbColumnList.contains(m.getName())) {
+                            m.setAction(ActionEnum.MODIFY);
+                        }
+                    }));
+
             //如果实体属性不存在，标记删除列
-            tableList.stream().filter(j -> tableName.equalsIgnoreCase(j.getName()))
+            tableList.stream().filter(j -> tableName.equalsIgnoreCase(convertName(j.getName())))
                     .findAny().ifPresent(t -> {
-                dbColumnList.stream().filter(k -> t.getColumnSet().stream().noneMatch(m -> m.getName().equals(k)))
+                dbColumnList.stream().filter(k -> t.getColumnSet().stream().noneMatch(m -> convertName(m.getName()).equalsIgnoreCase(k)))
                         .forEach(n -> {
                             DbColumn delColumn = new DbColumn();
                             delColumn.setName(n);
@@ -125,17 +126,24 @@ public class BasicSQLConvertor extends SQLConvertor {
 
 
         //如果库中表已存在，标记表为修改
-        tableList.stream().filter(k -> dbTableList.contains(k.getName().toLowerCase()))
+        tableList.stream().filter(k -> dbTableList.contains(convertName(k.getName())))
                 .forEach(table -> table.setAction(ActionEnum.MODIFY));
 
         //如果实体不存在，标记删除表
-        dbTableList.stream().filter(k -> tableList.stream().noneMatch(j -> j.getName().equalsIgnoreCase(k)))
+        dbTableList.stream().filter(k -> tableList.stream().noneMatch(j -> convertName(j.getName()).equalsIgnoreCase(k)))
                 .forEach(t -> {
                     DbTable delTable = new DbTable();
                     delTable.setName(t);
                     delTable.setAction(ActionEnum.REMOVE);
                     tableList.add(delTable);
                 });
+    }
+
+    private String convertName(String name) {
+        if (configuration.getMapToUnderscore()) {
+            return FlyRafterUtils.convertToUnderscore(name);
+        }
+        return name;
     }
 
 
@@ -147,10 +155,10 @@ public class BasicSQLConvertor extends SQLConvertor {
      */
     private StringBuffer createSQL(DbTable table) {
         StringBuffer tableSql = new StringBuffer();
-        tableSql.append(String.format(CreateSQLTemplate.TABLE_PREFIX, table.getName()));
+        tableSql.append(String.format(CreateSQLTemplate.TABLE_PREFIX, convertName(table.getName())));
 
         List<String> columnSqlList = table.getColumnSet().stream()
-                .map(column -> String.format(CreateSQLTemplate.COLUMN, column.getName(), column.getDefinition()))
+                .map(column -> String.format(CreateSQLTemplate.COLUMN, convertName(column.getName()), column.getDefinition()))
                 .collect(Collectors.toList());
 
         //如果列全为空，抛出异常
@@ -162,7 +170,7 @@ public class BasicSQLConvertor extends SQLConvertor {
         if (!ignorePrimaryKey) {
             DbColumn dbColumn = table.getColumnSet().stream().filter(column -> column.getPrimaryKey()).findAny().orElseThrow(() -> new NoPrimaryKeyException(table.getName()));
 
-            tableSql.append(String.format(CreateSQLTemplate.PRIMARY_KEY, dbColumn.getName()));
+            tableSql.append(String.format(CreateSQLTemplate.PRIMARY_KEY, convertName(dbColumn.getName())));
         }
 
         tableSql.append(CreateSQLTemplate.TABLE_SUFFIX);
@@ -178,7 +186,7 @@ public class BasicSQLConvertor extends SQLConvertor {
      */
     private StringBuffer dropSQL(DbTable table) {
         StringBuffer sql = new StringBuffer();
-        sql.append(String.format(DropSQLTemplate.DROP_TABLE, table.getName()));
+        sql.append(String.format(DropSQLTemplate.DROP_TABLE, convertName(table.getName())));
         sql.append(lineSeparator());
         return sql;
     }
@@ -197,15 +205,16 @@ public class BasicSQLConvertor extends SQLConvertor {
         sql.append(lineSeparator());
         sql.append(String.format(AlertSQLTemplate.ALTER_PREFIX, table.getName()));
         for (DbColumn column : table.getColumnSet()) {
+            String name = convertName(column.getName());
             switch (column.getAction()) {
                 case REMOVE:
-                    sql.append(String.format(AlertSQLTemplate.DROP_COLUMN, column.getName()));
+                    sql.append(String.format(AlertSQLTemplate.DROP_COLUMN, name));
                     break;
                 case MODIFY:
-                    sql.append(String.format(AlertSQLTemplate.MODIFY_COLUMN, column.getName(), column.getDefinition()));
+                    sql.append(String.format(AlertSQLTemplate.MODIFY_COLUMN, name, column.getDefinition()));
                     break;
                 default:
-                    sql.append(String.format(AlertSQLTemplate.ADD_COLUMN, column.getName(), column.getDefinition()));
+                    sql.append(String.format(AlertSQLTemplate.ADD_COLUMN, name, column.getDefinition()));
                     break;
             }
             sql.append(",");

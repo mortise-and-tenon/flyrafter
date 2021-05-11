@@ -85,4 +85,16 @@ class AnnotationProcessorTest {
         assertEquals(ActionEnum.ADD,myTable1.getAction());
         assertEquals(ActionEnum.ADD,myTable1.getColumnSet().iterator().next().getAction());
     }
+
+    @Test
+    void processTest6(){
+        DbTable myTable6 = getTable("MyTable6");
+        assertEquals(2,myTable6.getColumnSet().size());
+    }
+
+    @Test
+    void processTest7(){
+        DbTable myTable5 = getTable("MyTable5");
+        assertEquals(1,myTable5.getColumnSet().size());
+    }
 }

@@ -1,5 +1,6 @@
 package fun.mortnon.flyrafter.resolver;
 
+import fun.mortnon.flyrafter.annotation.Ignore;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import fun.mortnon.flyrafter.entity.DbColumn;
@@ -77,35 +78,41 @@ public class AnnotationProcessor implements Constants {
 
     private void parseColumn(Field[] fields, LinkedHashSet<DbColumn> columnSet) {
         //排除 static 的属性
-        Arrays.stream(fields).filter(k-> !Modifier.isStatic(k.getModifiers()))
+        Arrays.stream(fields).filter(k -> !Modifier.isStatic(k.getModifiers()))
                 .forEach(field -> {
-            DbColumn dbColumn = new DbColumn();
-            dbColumn.setName(field.getName());
-            dbColumn.setDefinition(EntityDefinition.DefaultTypeDefinition.getOrDefault(field.getType().getName(), ""));
 
-            //字符串属性长度
-            int length = STRING_DEFAULT_LENGTH;
+                    //如果标记 @Ignore 注解，字段不解析为数据表字段
+                    if (field.isAnnotationPresent(Ignore.class)) {
+                        return;
+                    }
 
-            if (field.isAnnotationPresent(Column.class)) {
-                Column column = field.getAnnotation(Column.class);
-                String definition = column.columnDefinition();
-                //如果有自定义描述，使用自定义描述
-                if (StringUtils.isNotBlank(definition)) {
-                    dbColumn.setDefinition(definition);
-                } else if (field.getType().getName().equals(EntityDefinition.StringTypeName)) {
-                    length = column.length();
-                }
-            }
+                    DbColumn dbColumn = new DbColumn();
+                    dbColumn.setName(field.getName());
+                    dbColumn.setDefinition(EntityDefinition.DefaultTypeDefinition.getOrDefault(field.getType().getName(), ""));
 
-            dbColumn.setDefinition(String.format(dbColumn.getDefinition(), length));
+                    //字符串属性长度
+                    int length = STRING_DEFAULT_LENGTH;
 
-            //Id 注解，标注为主键
-            if (field.isAnnotationPresent(Id.class)) {
-                dbColumn.setPrimaryKey(true);
-            }
+                    if (field.isAnnotationPresent(Column.class)) {
+                        Column column = field.getAnnotation(Column.class);
+                        String definition = column.columnDefinition();
+                        //如果有自定义描述，使用自定义描述
+                        if (StringUtils.isNotBlank(definition)) {
+                            dbColumn.setDefinition(definition);
+                        } else if (field.getType().getName().equals(EntityDefinition.StringTypeName)) {
+                            length = column.length();
+                        }
+                    }
 
-            columnSet.add(dbColumn);
-        });
+                    dbColumn.setDefinition(String.format(dbColumn.getDefinition(), length));
+
+                    //Id 注解，标注为主键
+                    if (field.isAnnotationPresent(Id.class)) {
+                        dbColumn.setPrimaryKey(true);
+                    }
+
+                    columnSet.add(dbColumn);
+                });
     }
 
 
