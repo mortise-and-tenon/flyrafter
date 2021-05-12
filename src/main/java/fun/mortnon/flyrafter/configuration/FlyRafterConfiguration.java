@@ -29,7 +29,7 @@ public class FlyRafterConfiguration {
     /**
      * Whether to enable flyrafter.
      */
-    private boolean enabled = true;
+    private boolean enabled = false;
 
     /**
      * Version pattern for flyRafter sql file.
