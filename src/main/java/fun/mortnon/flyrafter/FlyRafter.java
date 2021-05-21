@@ -4,6 +4,7 @@ import fun.mortnon.flyrafter.configuration.FlyRafterConfiguration;
 import fun.mortnon.flyrafter.resolver.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -19,8 +20,12 @@ public class FlyRafter {
     private FileCreator fileCreator;
 
     FlyRafter(FlyRafterConfiguration configuration, DataSource dataSource) {
+        this(configuration, dataSource, null);
+    }
+
+    FlyRafter(FlyRafterConfiguration configuration, DataSource dataSource, ClassLoader classLoader) {
         this.configuration = configuration;
-        this.annotationProcessor = new AnnotationProcessor();
+        this.annotationProcessor = new AnnotationProcessor(classLoader);
         this.dataSource = dataSource;
         this.convertor = new BasicSQLConvertor(annotationProcessor, dataSource, configuration);
         this.fileCreator = new FileCreator();
@@ -42,6 +47,9 @@ public class FlyRafter {
         log.info("backup folder:{}", backup);
         String sqlFolder = FlyRafterUtils.fullPath(folder);
         String backupFolder = FlyRafterUtils.fullPath(backup);
+        if (StringUtils.isBlank(sqlFolder) || StringUtils.isBlank(backupFolder)) {
+            log.info("stop recover sql from [{}] to [{}].", backupFolder, sqlFolder);
+        }
         try {
             File backupDirectory = new File(backupFolder);
             File sqlDirectory = new File(sqlFolder);

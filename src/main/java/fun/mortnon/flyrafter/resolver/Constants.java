@@ -109,4 +109,9 @@ public interface Constants {
      * 需要忽略的 flyway 表
      */
     String IGNORE_FLYWAY_TABLE = "flyway_schema_history";
+
+    /**
+     * 编译目标目录标识
+     */
+    String TARGET_PATH = "target";
 }

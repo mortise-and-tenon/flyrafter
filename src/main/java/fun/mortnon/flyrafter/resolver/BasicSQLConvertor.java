@@ -50,7 +50,7 @@ public class BasicSQLConvertor extends SQLConvertor {
         try {
             parseDb(tableList);
         } catch (SQLException e) {
-            log.error("parse db data fail for ", e);
+            log.warn("parse db data fail,would not compare with db. ");
             return sql;
         }
 
@@ -101,7 +101,7 @@ public class BasicSQLConvertor extends SQLConvertor {
 
             //TODO: 细化检测定义是否变更，并调整表名、字段名的驼峰等风格不一格的判定
             //如果是已有列，标记为修改，否则默认为添加
-            tableList.stream().filter(k -> k.getName().equalsIgnoreCase(tableName))
+            tableList.stream().filter(k -> tableName.equalsIgnoreCase(convertName(k.getName())))
                     .findAny()
                     .ifPresent(j -> j.getColumnSet().stream().forEach(m -> {
                         if (dbColumnList.contains(m.getName())) {
@@ -126,11 +126,11 @@ public class BasicSQLConvertor extends SQLConvertor {
 
 
         //如果库中表已存在，标记表为修改
-        tableList.stream().filter(k -> dbTableList.contains(convertName(k.getName())))
+        tableList.stream().filter(k -> dbTableList.contains(convertTableName(k.getName())))
                 .forEach(table -> table.setAction(ActionEnum.MODIFY));
 
         //如果实体不存在，标记删除表
-        dbTableList.stream().filter(k -> tableList.stream().noneMatch(j -> convertName(j.getName()).equalsIgnoreCase(k)))
+        dbTableList.stream().filter(k -> tableList.stream().noneMatch(j -> convertTableName(j.getName()).equalsIgnoreCase(k)))
                 .forEach(t -> {
                     DbTable delTable = new DbTable();
                     delTable.setName(t);
@@ -140,8 +140,15 @@ public class BasicSQLConvertor extends SQLConvertor {
     }
 
     private String convertName(String name) {
-        if (configuration.getMapToUnderscore()) {
+        if (configuration.isMapToUnderscore()) {
             return FlyRafterUtils.convertToUnderscore(name);
+        }
+        return name;
+    }
+
+    private String convertTableName(String name) {
+        if (configuration.isMapToUnderscore()) {
+            return FlyRafterUtils.convertToUnderscore(name).toLowerCase();
         }
         return name;
     }
@@ -155,7 +162,7 @@ public class BasicSQLConvertor extends SQLConvertor {
      */
     private StringBuffer createSQL(DbTable table) {
         StringBuffer tableSql = new StringBuffer();
-        tableSql.append(String.format(CreateSQLTemplate.TABLE_PREFIX, convertName(table.getName())));
+        tableSql.append(String.format(CreateSQLTemplate.TABLE_PREFIX, convertTableName(table.getName())));
 
         List<String> columnSqlList = table.getColumnSet().stream()
                 .map(column -> String.format(CreateSQLTemplate.COLUMN, convertName(column.getName()), column.getDefinition()))

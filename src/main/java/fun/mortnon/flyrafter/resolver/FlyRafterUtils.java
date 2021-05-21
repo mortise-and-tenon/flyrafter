@@ -28,10 +28,20 @@ import static fun.mortnon.flyrafter.resolver.Constants.*;
 public class FlyRafterUtils {
     private FlyRafterConfiguration configuration;
     private DataSource dataSource;
+    private static ClassLoader specifyClassLoader;
 
     public FlyRafterUtils(DataSource dataSource, FlyRafterConfiguration configuration) {
         this.configuration = configuration;
         this.dataSource = dataSource;
+    }
+
+    public FlyRafterUtils(DataSource dataSource, FlyRafterConfiguration configuration, ClassLoader classLoader) {
+        this(dataSource, configuration);
+        setClassLoader(classLoader);
+    }
+
+    public static void setClassLoader(ClassLoader classLoader) {
+        specifyClassLoader = classLoader;
     }
 
     /**
@@ -91,6 +101,23 @@ public class FlyRafterUtils {
 
     }
 
+    public static String sourcePath(String folder) {
+        if (folder.startsWith(CLASSPATH)) {
+            folder = folder.substring(CLASSPATH.length());
+            String path = classFolder(folder);
+            path = path.substring(0,path.length() - folder.length());
+            File file = new File(path);
+            if (file.exists() && file.isDirectory()) {
+                String parent = file.getParent();
+                if (parent.endsWith(TARGET_PATH)) {
+                    File parentFolder = new File(parent);
+                    return parentFolder.getParent() + File.separator + "src/main/resources" + File.separator + folder;
+                }
+            }
+        }
+        return "";
+    }
+
     /**
      * 从 class 目录中查找配置的 sql 目录完整路径
      *
@@ -100,7 +127,11 @@ public class FlyRafterUtils {
     private static String classFolder(String folder) {
         Enumeration<URL> urlEnumeration = null;
         try {
-            urlEnumeration = Thread.currentThread().getContextClassLoader().getResources("");
+            if (null != specifyClassLoader) {
+                urlEnumeration = specifyClassLoader.getResources("");
+            } else {
+                urlEnumeration = Thread.currentThread().getContextClassLoader().getResources("");
+            }
         } catch (IOException e) {
             log.info("");
             return "";
@@ -236,6 +267,9 @@ public class FlyRafterUtils {
             return "";
         }
         try {
+            if (null == dataSource) {
+                return "";
+            }
             Connection connection = dataSource.getConnection();
             ResultSet resultSet = connection.createStatement()
                     .executeQuery(String.format(SELECT_FLYWAY_TABLE, historyTableName));
@@ -306,12 +340,12 @@ public class FlyRafterUtils {
         boolean hasUnderline = false;
         for (char c : name.toCharArray()) {
             if (UNDERSCORE.equals(c)) {
-                if(strBuffer.length() == 0){
+                if (strBuffer.length() == 0) {
                     strBuffer.append(c);
                     continue;
                 }
 
-                if(hasUnderline){
+                if (hasUnderline) {
                     strBuffer.append(c);
                 }
 
