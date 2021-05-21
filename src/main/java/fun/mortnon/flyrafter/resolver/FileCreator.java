@@ -37,14 +37,15 @@ public class FileCreator implements Constants {
 
         String sqlFolder = FlyRafterUtils.fullPath(folder);
         String backupFolder = FlyRafterUtils.fullPath(backup);
+        String sourcePath = FlyRafterUtils.sourcePath(folder);
         if (StringUtils.isNotBlank(sqlFolder)) {
-            return internalCreateFile(sql, fileName, sqlFolder, backupFolder);
+            return internalCreateFile(sql, fileName, sqlFolder, backupFolder, sourcePath, configuration.isCopyToSource());
         }
         log.error("resource folder {} is not exists.", folder);
         return false;
     }
 
-    private boolean internalCreateFile(String content, String fileName, String folder, String backupFolder) {
+    private boolean internalCreateFile(String content, String fileName, String folder, String backupFolder, String sourceFolder, boolean copyToSource) {
         if (StringUtils.isBlank(folder)) {
             log.info("create sql file fail for empty flyway folder.");
             return false;
@@ -68,6 +69,15 @@ public class FileCreator implements Constants {
 
                 //复制文件到备份目录
                 FileUtils.copyFileToDirectory(sqlFile, new File(backupFolder));
+
+                //复制文件到源码目录
+                if (StringUtils.isNotBlank(sourceFolder) && copyToSource) {
+                    File file = new File(sourceFolder);
+                    if (!file.exists()) {
+                        file.mkdirs();
+                    }
+                    FileUtils.copyFileToDirectory(sqlFile, file);
+                }
                 return true;
             }
             log.info("create sql file {} fail.", fileName);

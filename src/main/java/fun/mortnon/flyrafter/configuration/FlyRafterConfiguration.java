@@ -29,7 +29,7 @@ public class FlyRafterConfiguration {
     /**
      * Whether to enable flyrafter.
      */
-    private boolean enabled = false;
+    private boolean enabled = true;
 
     /**
      * Version pattern for flyRafter sql file.
@@ -47,9 +47,14 @@ public class FlyRafterConfiguration {
     private String backup;
 
     /**
-     * Map name to underscore style in sql file.
+     * Whether to map name to underscore style in sql file.
      */
-    private Boolean mapToUnderscore = true;
+    private boolean mapToUnderscore = true;
+
+    /**
+     * Whether to copy generate sql file to source code resources folder.
+     */
+    private boolean copyToSource = true;
 
     /**
      * flyway 记录表名

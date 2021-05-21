@@ -1,10 +1,10 @@
 package fun.mortnon.flyrafter.resolver;
 
 import fun.mortnon.flyrafter.annotation.Ignore;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import fun.mortnon.flyrafter.entity.DbColumn;
 import fun.mortnon.flyrafter.entity.DbTable;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -31,9 +31,14 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class AnnotationProcessor implements Constants {
+    private ClassLoader specifyLoader;
 
     public AnnotationProcessor() {
 
+    }
+
+    public AnnotationProcessor(ClassLoader classLoader) {
+        this.specifyLoader = classLoader;
     }
 
     public List<DbTable> process() {
@@ -126,7 +131,11 @@ public class AnnotationProcessor implements Constants {
 
         Enumeration<URL> dirs = null;
         try {
-            dirs = Thread.currentThread().getContextClassLoader().getResources("");
+            if (null != specifyLoader) {
+                dirs = specifyLoader.getResources("");
+            } else {
+                dirs = Thread.currentThread().getContextClassLoader().getResources("");
+            }
         } catch (IOException e) {
             log.error("get all class by classloader fail for ", e);
             return classList;
@@ -175,7 +184,11 @@ public class AnnotationProcessor implements Constants {
                                 if (name.endsWith(CLASS_SUFFIX) && !entry.isDirectory()) {
                                     String className = name.substring(packageName.length() + 1, name.length() - CLASS_SUFFIX.length());
                                     try {
-                                        classList.add(Class.forName(packageName + SPLIT_DOT + className));
+                                        if (null != specifyLoader) {
+                                            classList.add(specifyLoader.loadClass(packageName + SPLIT_DOT + className));
+                                        } else {
+                                            classList.add(Class.forName(packageName + SPLIT_DOT + className));
+                                        }
                                     } catch (ClassNotFoundException e) {
                                         log.debug("get class fail for {}", e);
                                     }
@@ -223,7 +236,11 @@ public class AnnotationProcessor implements Constants {
                 try {
                     // 添加到集合中去
                     String targetClassName = packageName + SPLIT_DOT + className;
-                    classes.add(Class.forName(targetClassName));
+                    if (null != specifyLoader) {
+                        classes.add(specifyLoader.loadClass(targetClassName));
+                    } else {
+                        classes.add(Class.forName(targetClassName));
+                    }
                 } catch (ClassNotFoundException e) {
                     log.error("get class fail for ", e);
                 }

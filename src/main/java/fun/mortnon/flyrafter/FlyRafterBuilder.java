@@ -1,6 +1,7 @@
 package fun.mortnon.flyrafter;
 
 import fun.mortnon.flyrafter.configuration.FlyRafterConfiguration;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
 
@@ -8,18 +9,24 @@ import javax.sql.DataSource;
  * @author Moon Wu
  * @date 2021/4/25
  */
+@Slf4j
 public class FlyRafterBuilder {
     private FlyRafterConfiguration configuration;
     private DataSource dataSource;
+    private ClassLoader classLoader;
 
     /**
-     *
      * @param configuration
      * @param dataSource
      */
     public FlyRafterBuilder(FlyRafterConfiguration configuration, DataSource dataSource) {
         this.configuration = configuration;
         this.dataSource = dataSource;
+    }
+
+    public FlyRafterBuilder(FlyRafterConfiguration configuration, DataSource dataSource, ClassLoader classLoader) {
+        this(configuration, dataSource);
+        this.classLoader = classLoader;
     }
 
     public FlyRafterBuilder() {
@@ -49,16 +56,26 @@ public class FlyRafterBuilder {
     }
 
     /**
+     * 设置类加载器
+     *
+     * @param classLoader
+     * @return
+     */
+    public FlyRafterBuilder bindClassLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
+        return this;
+    }
+
+    /**
      * 生成 FlyRafter 实例
      *
      * @return
      */
     public FlyRafter build() {
-        //TODO 判断对象不为空
         if (null == dataSource) {
-            throw new NullPointerException("datasource is null.");
+            log.info("datasource is null.");
         }
 
-        return new FlyRafter(configuration, dataSource);
+        return new FlyRafter(configuration, dataSource, classLoader);
     }
 }
