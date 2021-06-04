@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
 import java.net.URLClassLoader;
+import java.util.List;
 
 /**
  * @author Moon Wu
@@ -15,6 +16,7 @@ public class FlyRafterBuilder {
     private FlyRafterConfiguration configuration;
     private DataSource dataSource;
     private URLClassLoader classLoader;
+    private List<String> excludePackages;
 
     /**
      * @param configuration
@@ -28,6 +30,12 @@ public class FlyRafterBuilder {
     public FlyRafterBuilder(FlyRafterConfiguration configuration, DataSource dataSource, URLClassLoader classLoader) {
         this(configuration, dataSource);
         this.classLoader = classLoader;
+    }
+
+    public FlyRafterBuilder(FlyRafterConfiguration configuration, DataSource dataSource, URLClassLoader classLoader, List<String> excludePackages) {
+        this(configuration, dataSource);
+        this.classLoader = classLoader;
+        this.excludePackages = excludePackages;
     }
 
     public FlyRafterBuilder() {
@@ -67,6 +75,11 @@ public class FlyRafterBuilder {
         return this;
     }
 
+    public FlyRafterBuilder excludePackages(List<String> excludePackages) {
+        this.excludePackages = excludePackages;
+        return this;
+    }
+
     /**
      * 生成 FlyRafter 实例
      *
@@ -77,6 +90,6 @@ public class FlyRafterBuilder {
             log.info("datasource is null.");
         }
 
-        return new FlyRafter(configuration, dataSource, classLoader);
+        return new FlyRafter(configuration, dataSource, classLoader, excludePackages);
     }
 }

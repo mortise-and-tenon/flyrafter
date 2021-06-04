@@ -10,6 +10,7 @@ import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLClassLoader;
+import java.util.List;
 
 @Slf4j
 public class FlyRafter {
@@ -25,8 +26,13 @@ public class FlyRafter {
     }
 
     FlyRafter(FlyRafterConfiguration configuration, DataSource dataSource, URLClassLoader classLoader) {
+        this(configuration, dataSource, classLoader, null);
+    }
+
+    FlyRafter(FlyRafterConfiguration configuration, DataSource dataSource, URLClassLoader classLoader, List<String> excludePackages) {
         this.configuration = configuration;
-        this.annotationProcessor = new AnnotationProcessor(classLoader);
+        this.annotationProcessor = new AnnotationProcessor(classLoader, excludePackages);
+        FlyRafterUtils.setClassLoader(classLoader);
         this.dataSource = dataSource;
         this.convertor = new BasicSQLConvertor(annotationProcessor, dataSource, configuration);
         this.fileCreator = new FileCreator();
