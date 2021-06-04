@@ -17,6 +17,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.JarURLConnection;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.net.URLDecoder;
 import java.util.*;
 import java.util.jar.JarEntry;
@@ -31,13 +32,13 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class AnnotationProcessor implements Constants {
-    private ClassLoader specifyLoader;
+    private URLClassLoader specifyLoader;
 
     public AnnotationProcessor() {
 
     }
 
-    public AnnotationProcessor(ClassLoader classLoader) {
+    public AnnotationProcessor(URLClassLoader classLoader) {
         this.specifyLoader = classLoader;
     }
 
@@ -129,20 +130,20 @@ public class AnnotationProcessor implements Constants {
     private List<Class<?>> getAllClasses() {
         List<Class<?>> classList = new ArrayList<>();
 
-        Enumeration<URL> dirs = null;
+        List<URL> dirs = null;
         try {
             if (null != specifyLoader) {
-                dirs = specifyLoader.getResources("");
+                dirs = Arrays.asList(specifyLoader.getURLs());
             } else {
-                dirs = Thread.currentThread().getContextClassLoader().getResources("");
+                Enumeration<URL> urls = Thread.currentThread().getContextClassLoader().getResources("");
+                dirs = Collections.list(urls);
             }
         } catch (IOException e) {
             log.error("get all class by classloader fail for ", e);
             return classList;
         }
 
-        while (dirs.hasMoreElements()) {
-            URL url = dirs.nextElement();
+        for (URL url : dirs) {
             String packageDirName = "";
             String packageName = "";
 
@@ -168,32 +169,19 @@ public class AnnotationProcessor implements Constants {
                     while (entries.hasMoreElements()) {
                         JarEntry entry = entries.nextElement();
                         String name = entry.getName();
-
-                        if (name.charAt(0) == File.separatorChar) {
-                            name = name.substring(1);
+                        if (!name.endsWith(CLASS_SUFFIX)) {
+                            continue;
                         }
 
-                        if (name.startsWith(packageDirName)) {
-                            int idx = name.lastIndexOf(File.separatorChar);
-                            if (idx != -1) {
-                                packageName = name.substring(0, idx).replace(File.separatorChar, SPLIT_DOT);
+                        String className = name.replace(URL_SEPARATOR, SPLIT_DOT).substring(0, name.length() - CLASS_SUFFIX.length());
+                        try {
+                            if (null != specifyLoader) {
+                                classList.add(specifyLoader.loadClass(className));
+                            } else {
+                                classList.add(Class.forName(className));
                             }
-                            // 如果可以迭代下去 并且是一个包
-                            if ((idx != -1)) {
-                                // 如果是一个.class文件 而且不是目录
-                                if (name.endsWith(CLASS_SUFFIX) && !entry.isDirectory()) {
-                                    String className = name.substring(packageName.length() + 1, name.length() - CLASS_SUFFIX.length());
-                                    try {
-                                        if (null != specifyLoader) {
-                                            classList.add(specifyLoader.loadClass(packageName + SPLIT_DOT + className));
-                                        } else {
-                                            classList.add(Class.forName(packageName + SPLIT_DOT + className));
-                                        }
-                                    } catch (ClassNotFoundException e) {
-                                        log.debug("get class fail for {}", e);
-                                    }
-                                }
-                            }
+                        } catch (ClassNotFoundException e) {
+                            log.debug("get class fail for {}", e);
                         }
                     }
                 } catch (IOException e) {

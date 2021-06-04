@@ -4,6 +4,7 @@ import fun.mortnon.flyrafter.configuration.FlyRafterConfiguration;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
+import java.net.URLClassLoader;
 
 /**
  * @author Moon Wu
@@ -13,7 +14,7 @@ import javax.sql.DataSource;
 public class FlyRafterBuilder {
     private FlyRafterConfiguration configuration;
     private DataSource dataSource;
-    private ClassLoader classLoader;
+    private URLClassLoader classLoader;
 
     /**
      * @param configuration
@@ -24,7 +25,7 @@ public class FlyRafterBuilder {
         this.dataSource = dataSource;
     }
 
-    public FlyRafterBuilder(FlyRafterConfiguration configuration, DataSource dataSource, ClassLoader classLoader) {
+    public FlyRafterBuilder(FlyRafterConfiguration configuration, DataSource dataSource, URLClassLoader classLoader) {
         this(configuration, dataSource);
         this.classLoader = classLoader;
     }
@@ -61,7 +62,7 @@ public class FlyRafterBuilder {
      * @param classLoader
      * @return
      */
-    public FlyRafterBuilder bindClassLoader(ClassLoader classLoader) {
+    public FlyRafterBuilder bindClassLoader(URLClassLoader classLoader) {
         this.classLoader = classLoader;
         return this;
     }

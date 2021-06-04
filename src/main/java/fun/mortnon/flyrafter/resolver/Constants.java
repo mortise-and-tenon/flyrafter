@@ -114,4 +114,9 @@ public interface Constants {
      * 编译目标目录标识
      */
     String TARGET_PATH = "target";
+
+    /**
+     * URL 分隔符 /
+     */
+    char URL_SEPARATOR = '/';
 }
