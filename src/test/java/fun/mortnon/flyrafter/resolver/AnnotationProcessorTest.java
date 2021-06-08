@@ -1,10 +1,10 @@
 package fun.mortnon.flyrafter.resolver;
 
+import fun.mortnon.flyrafter.entity.DbTable;
+import fun.mortnon.flyrafter.enums.ActionEnum;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.StringUtils;
-import fun.mortnon.flyrafter.enums.ActionEnum;
-import fun.mortnon.flyrafter.entity.DbTable;
 
 import java.util.List;
 
