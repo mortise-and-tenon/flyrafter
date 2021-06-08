@@ -16,7 +16,7 @@ public class FlyRafterBuilder {
     private FlyRafterConfiguration configuration;
     private DataSource dataSource;
     private URLClassLoader classLoader;
-    private List<String> excludePackages;
+    private List<String> includePackages;
 
     /**
      * @param configuration
@@ -32,10 +32,10 @@ public class FlyRafterBuilder {
         this.classLoader = classLoader;
     }
 
-    public FlyRafterBuilder(FlyRafterConfiguration configuration, DataSource dataSource, URLClassLoader classLoader, List<String> excludePackages) {
+    public FlyRafterBuilder(FlyRafterConfiguration configuration, DataSource dataSource, URLClassLoader classLoader, List<String> includePackages) {
         this(configuration, dataSource);
         this.classLoader = classLoader;
-        this.excludePackages = excludePackages;
+        this.includePackages = includePackages;
     }
 
     public FlyRafterBuilder() {
@@ -75,8 +75,8 @@ public class FlyRafterBuilder {
         return this;
     }
 
-    public FlyRafterBuilder excludePackages(List<String> excludePackages) {
-        this.excludePackages = excludePackages;
+    public FlyRafterBuilder includePackages(List<String> includePackages) {
+        this.includePackages = includePackages;
         return this;
     }
 
@@ -90,6 +90,6 @@ public class FlyRafterBuilder {
             log.info("datasource is null.");
         }
 
-        return new FlyRafter(configuration, dataSource, classLoader, excludePackages);
+        return new FlyRafter(configuration, dataSource, classLoader, includePackages);
     }
 }

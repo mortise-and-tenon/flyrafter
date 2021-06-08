@@ -29,9 +29,9 @@ public class FlyRafter {
         this(configuration, dataSource, classLoader, null);
     }
 
-    FlyRafter(FlyRafterConfiguration configuration, DataSource dataSource, URLClassLoader classLoader, List<String> excludePackages) {
+    FlyRafter(FlyRafterConfiguration configuration, DataSource dataSource, URLClassLoader classLoader, List<String> includePackages) {
         this.configuration = configuration;
-        this.annotationProcessor = new AnnotationProcessor(classLoader, excludePackages);
+        this.annotationProcessor = new AnnotationProcessor(classLoader, includePackages);
         FlyRafterUtils.setClassLoader(classLoader);
         this.dataSource = dataSource;
         this.convertor = new BasicSQLConvertor(annotationProcessor, dataSource, configuration);
