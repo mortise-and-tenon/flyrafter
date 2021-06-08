@@ -9,6 +9,8 @@ import org.apache.commons.lang3.StringUtils;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
+import java.net.URLClassLoader;
+import java.util.List;
 
 @Slf4j
 public class FlyRafter {
@@ -23,9 +25,14 @@ public class FlyRafter {
         this(configuration, dataSource, null);
     }
 
-    FlyRafter(FlyRafterConfiguration configuration, DataSource dataSource, ClassLoader classLoader) {
+    FlyRafter(FlyRafterConfiguration configuration, DataSource dataSource, URLClassLoader classLoader) {
+        this(configuration, dataSource, classLoader, null);
+    }
+
+    FlyRafter(FlyRafterConfiguration configuration, DataSource dataSource, URLClassLoader classLoader, List<String> includePackages) {
         this.configuration = configuration;
-        this.annotationProcessor = new AnnotationProcessor(classLoader);
+        this.annotationProcessor = new AnnotationProcessor(classLoader, includePackages);
+        FlyRafterUtils.setClassLoader(classLoader);
         this.dataSource = dataSource;
         this.convertor = new BasicSQLConvertor(annotationProcessor, dataSource, configuration);
         this.fileCreator = new FileCreator();

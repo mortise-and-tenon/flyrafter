@@ -4,6 +4,8 @@ import fun.mortnon.flyrafter.configuration.FlyRafterConfiguration;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
+import java.net.URLClassLoader;
+import java.util.List;
 
 /**
  * @author Moon Wu
@@ -13,7 +15,8 @@ import javax.sql.DataSource;
 public class FlyRafterBuilder {
     private FlyRafterConfiguration configuration;
     private DataSource dataSource;
-    private ClassLoader classLoader;
+    private URLClassLoader classLoader;
+    private List<String> includePackages;
 
     /**
      * @param configuration
@@ -24,9 +27,15 @@ public class FlyRafterBuilder {
         this.dataSource = dataSource;
     }
 
-    public FlyRafterBuilder(FlyRafterConfiguration configuration, DataSource dataSource, ClassLoader classLoader) {
+    public FlyRafterBuilder(FlyRafterConfiguration configuration, DataSource dataSource, URLClassLoader classLoader) {
         this(configuration, dataSource);
         this.classLoader = classLoader;
+    }
+
+    public FlyRafterBuilder(FlyRafterConfiguration configuration, DataSource dataSource, URLClassLoader classLoader, List<String> includePackages) {
+        this(configuration, dataSource);
+        this.classLoader = classLoader;
+        this.includePackages = includePackages;
     }
 
     public FlyRafterBuilder() {
@@ -61,8 +70,13 @@ public class FlyRafterBuilder {
      * @param classLoader
      * @return
      */
-    public FlyRafterBuilder bindClassLoader(ClassLoader classLoader) {
+    public FlyRafterBuilder bindClassLoader(URLClassLoader classLoader) {
         this.classLoader = classLoader;
+        return this;
+    }
+
+    public FlyRafterBuilder includePackages(List<String> includePackages) {
+        this.includePackages = includePackages;
         return this;
     }
 
@@ -76,6 +90,6 @@ public class FlyRafterBuilder {
             log.info("datasource is null.");
         }
 
-        return new FlyRafter(configuration, dataSource, classLoader);
+        return new FlyRafter(configuration, dataSource, classLoader, includePackages);
     }
 }
