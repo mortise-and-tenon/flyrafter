@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AnnotationProcessor implements Constants {
     private URLClassLoader specifyLoader;
-    private List<String> excludePackages;
+    private List<String> includePackages;
 
     public AnnotationProcessor() {
 
@@ -43,9 +43,9 @@ public class AnnotationProcessor implements Constants {
         this.specifyLoader = classLoader;
     }
 
-    public AnnotationProcessor(URLClassLoader classLoader, List<String> excludePackages) {
+    public AnnotationProcessor(URLClassLoader classLoader, List<String> includePackages) {
         this.specifyLoader = classLoader;
-        this.excludePackages = excludePackages;
+        this.includePackages = includePackages;
     }
 
     public List<DbTable> process() {
@@ -183,14 +183,10 @@ public class AnnotationProcessor implements Constants {
                         try {
                             if (null != specifyLoader) {
                                 log.debug("class:" + className);
-                                if (null != excludePackages
-                                        && excludePackages.stream().anyMatch(k -> className.startsWith(k))) {
-                                    continue;
+                                if (null != includePackages
+                                        && includePackages.stream().anyMatch(k -> className.startsWith(k))) {
+                                    classList.add(specifyLoader.loadClass(className));
                                 }
-                                if (className.startsWith("org.springframework")) {
-                                    continue;
-                                }
-                                classList.add(specifyLoader.loadClass(className));
                             } else {
                                 classList.add(Class.forName(className));
                             }
