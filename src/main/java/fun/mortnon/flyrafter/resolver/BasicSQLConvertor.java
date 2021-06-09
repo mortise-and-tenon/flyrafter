@@ -51,7 +51,6 @@ public class BasicSQLConvertor extends SQLConvertor {
             parseDb(tableList);
         } catch (SQLException e) {
             log.warn("parse db data fail,would not compare with db. ");
-            return sql;
         }
 
 
