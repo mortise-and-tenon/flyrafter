@@ -57,15 +57,18 @@ public class FlyRafter {
         if (StringUtils.isBlank(sqlFolder) || StringUtils.isBlank(backupFolder)) {
             log.info("stop recover sql from [{}] to [{}].", backupFolder, sqlFolder);
         }
-        try {
-            File backupDirectory = new File(backupFolder);
-            File sqlDirectory = new File(sqlFolder);
+        //指定了备份文件路径，才进行备份恢复
+        if (StringUtils.isNotEmpty(backupFolder)) {
+            try {
+                File backupDirectory = new File(backupFolder);
+                File sqlDirectory = new File(sqlFolder);
 
-            FileUtils.copyDirectory(backupDirectory, sqlDirectory);
-        } catch (IOException e) {
-            log.warn("recovery backup fail for:", e);
+                FileUtils.copyDirectory(backupDirectory, sqlDirectory);
+            } catch (IOException e) {
+                log.warn("recovery backup fail for:", e);
+            }
+            log.info("recovery backup sql file finish.");
         }
-        log.info("recovery backup sql file finish.");
     }
 
     /**

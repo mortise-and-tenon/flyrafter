@@ -75,17 +75,30 @@ public class AnnotationProcessor implements Constants {
 
             //处理父类的属性
             Class<?> superclass = cls.getSuperclass();
-            if (null != superclass) {
-                MappedSuperclass annotation = superclass.getAnnotation(MappedSuperclass.class);
-                if (null != annotation) {
-                    Field[] parentFields = superclass.getDeclaredFields();
-                    parseColumn(parentFields, columnSet);
-                }
-            }
+            parseSuperClass(superclass, columnSet);
 
             return table;
         }).collect(Collectors.toList());
 
+    }
+
+    private void parseSuperClass(Class<?> superClass, LinkedHashSet<DbColumn> columnSet) {
+        if (null == superClass) {
+            return;
+        }
+
+        Ignore annotation = superClass.getAnnotation(Ignore.class);
+        //如果父类未被忽略，识别父类字段
+        if (null != annotation) {
+            return;
+        }
+
+        Field[] parentFields = superClass.getDeclaredFields();
+        parseColumn(parentFields, columnSet);
+
+        //递归处理父类
+        Class<?> moreSuperClass = superClass.getSuperclass();
+        parseSuperClass(moreSuperClass, columnSet);
     }
 
     private void parseColumn(Field[] fields, LinkedHashSet<DbColumn> columnSet) {
