@@ -41,7 +41,7 @@ class FlyRafterTest {
         }
 
         configuration = new FlyRafterConfiguration();
-        configuration.setBackup("filesystem:C:\\projects\\mortnon\\test");
+//        configuration.setBackup("filesystem:C:\\projects\\mortnon\\test");
 
     }
 

@@ -42,9 +42,11 @@ public class FlyRafterConfiguration {
     private List<String> locations;
 
     /**
-     * Sql file backup folder.
+     * Sql file backup folder.sample:
+     * 1. "filesystem:/var/flyrafter-backup"
+     * 2. "classpath:debug/flyrafter-backup"
      */
-    private String backup;
+    private String backup = "";
 
     /**
      * Whether to map name to underscore style in sql file.
@@ -89,11 +91,6 @@ public class FlyRafterConfiguration {
     }
 
     public String getBackup() {
-        if (StringUtils.isBlank(backup)) {
-            return String.format("%s:%s%s%s", Constants.FILE_SYSTEM,
-                    FlyRafterUtils.currentLocation(), File.separator, Constants.DEFAULT_BACKUP);
-        }
-
         return backup;
     }
 
